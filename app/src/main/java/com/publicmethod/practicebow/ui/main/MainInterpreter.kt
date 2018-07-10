@@ -1,5 +1,7 @@
 package com.publicmethod.practicebow.ui.main
 
+import arrow.core.None
+import arrow.core.Some
 import arrow.core.toOption
 import arrow.data.ReaderApi
 import com.publicmethod.practicebow.MVCViewModel.Interpreter
@@ -11,7 +13,12 @@ object MainInterpreter : Interpreter<MainCommand, MainAction> {
         return when (command) {
             is GetEricCommand -> GetEricAction(
                     reader = ReaderApi.lift {
-                        return@lift it.ericApiService.getEric().toOption()
+                        with(it.ericApiService.getEric()) {
+                            when {
+                                this != null -> Some(this)
+                                else -> None
+                            }
+                        }
                     },
                     ericDependencies = command.dependencies)
         }
