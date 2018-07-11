@@ -1,6 +1,7 @@
 package com.publicmethod.practicebow.ui.main
 
 import arrow.core.value
+import arrow.data.run
 import com.publicmethod.practicebow.MVC.Processor
 import com.publicmethod.practicebow.ui.main.MainAction.GetItemAction
 import com.publicmethod.practicebow.ui.main.MainAction.GetItemsAction
@@ -16,9 +17,10 @@ object MainProcessor : Processor<MainAction, MainResult> {
     private fun processGetItemAction(action: GetItemAction): MainResult.GetItemResult {
         return with(action) {
             MainResult.GetItemResult(
-                    reader.run(action.itemDependencies)
+                    reader.run(itemDependencies)
                             .value()
-                            .unsafeRunSync())
+                            .unsafeRunSync(),
+                    state.run(currentLoadItemClickAmount).a)
         }
     }
 

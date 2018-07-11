@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.publicmethod.practicebow.*
+import com.publicmethod.practicebow.ui.main.MainCommand.*
 import com.publicmethod.practicebow.ui.main.MainState.*
 import kotlinx.android.synthetic.main.main_fragment.*
 
@@ -29,6 +30,7 @@ class MainFragment : Fragment(), ViewController<MainState> {
         instantiateViewModel()
         subscribeToStateChannel()
         getReferenceToApplication()
+        viewModel.stateLiveData.value?.apply { renderState(this) }
         state_button.setOnClickListener {
             issueGetItemCommand()
         }
@@ -47,15 +49,16 @@ class MainFragment : Fragment(), ViewController<MainState> {
 
     private fun issueGetItemCommand() {
         viewModel.issueCommand(
-                command = MainCommand.GetItemCommand(
+                command = GetItemCommand(
                         dependencies = GetItemDependencies(
                                 itemRepository = app.getItemRepository()),
-                        itemId = "itemID"))
+                        itemId = "itemID",
+                        currentLoadItemClickAmount = button_one_clicks.text.toString()))
     }
 
     private fun issueGetItemsCommand() {
         viewModel.issueCommand(
-                command = MainCommand.GetItemsCommand(
+                command = GetItemsCommand(
                         dependencies = GetItemDependencies(
                                 itemRepository = app.getItemRepository())))
     }
@@ -70,14 +73,30 @@ class MainFragment : Fragment(), ViewController<MainState> {
 
     override fun renderState(state: MainState) {
         when (state) {
-            is NoItemsErrorState -> state_message.text = state.errorMessage
-            is ShowItemState -> state_message.text = state.item.name
-            is ShowItemsState -> {
-                var items = ""
-                state.items.forEach { items += it.name }
-                state_message.text = items
-            }
+            is NoItemsErrorState -> renderNoItemErrorState(state)
+            is ShowItemState -> renderShowItemState(state)
+            is ShowItemsState -> renderShowItemsState(state)
         }
     }
+
+    private fun renderShowItemsState(state: ShowItemsState) =
+            with(state) {
+                var itemNames = ""
+                items.forEach { itemNames += it.name }
+                state_message.text = itemNames
+            }
+
+    private fun renderShowItemState(state: ShowItemState) {
+        with(state) {
+            state_message.text = item.name
+            button_one_clicks.text = loadItemClickAmount
+        }
+    }
+
+    private fun renderNoItemErrorState(state: NoItemsErrorState) =
+            with(state) {
+                state_message.text = errorMessage
+                button_one_clicks.text = loadItemClickAmount
+            }
 }
 
