@@ -1,13 +1,19 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.publicmethod.practicebow
 
 import android.arch.lifecycle.ViewModel
-import android.util.Log
-import com.publicmethod.practicebow.MVCViewModel.*
+import arrow.data.Reader
+import arrow.data.map
+import com.publicmethod.practicebow.MVC.Action
+import com.publicmethod.practicebow.MVC.Command
+import com.publicmethod.practicebow.MVC.Interpreter
+import com.publicmethod.practicebow.MVC.Processor
+import com.publicmethod.practicebow.MVC.Reducer
+import com.publicmethod.practicebow.MVC.Renderer
+import com.publicmethod.practicebow.MVC.Result
+import com.publicmethod.practicebow.MVC.State
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.channels.BroadcastChannel
-import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.experimental.channels.SendChannel
-import kotlinx.coroutines.experimental.channels.actor
 import kotlinx.coroutines.experimental.launch
 
 abstract class MVCViewModel<
@@ -16,49 +22,17 @@ abstract class MVCViewModel<
         R : Result,
         S : State> : ViewModel() {
 
-    interface Command
-    interface Action
-    interface State
-    interface Result
+    protected abstract val interpreter: Interpreter<C, A>
+    protected abstract val processor: Processor<A, R>
+    protected abstract val reducer: Reducer<R, S>
+    protected abstract val renderer: Renderer<S>
 
-    interface Interpreter<C, A> {
-        fun interpret(command: C): A
+    fun issueCommand(command: C) = launch(CommonPool) {
+        Reader(interpreter::interpret)
+                .map { processor::process }
+                .map { reducer::reduce }
+                .map { renderer::render }
+                .run(command)
     }
-
-    interface Processor<A, R> {
-        fun process(action: A): R
-    }
-
-    interface Reducer<R, S> {
-        fun reduce(result: R): S
-    }
-
-    fun issueCommand(command: C) = launch(CommonPool) { commandChannel.send(command) }
-
-    val stateChannel: BroadcastChannel<S> = ConflatedBroadcastChannel()
-
-    abstract protected val interpreter: Interpreter<C, A>
-    abstract protected val processor: Processor<A, R>
-    abstract protected val reducer: Reducer<R, S>
-
-    protected val commandChannel: SendChannel<C> = actor {
-            for (command in channel) {
-                Log.d("THING", command.toString())
-                actionChannel.send(interpreter.interpret(command))
-            }
-        }
-
-    protected val actionChannel: SendChannel<A> = actor {
-            for (action in channel) {
-                Log.d("THING", action.toString())
-                resultChannel.send(processor.process(action))
-            }
-        }
-
-    protected val resultChannel: SendChannel<R> = actor {
-            for (result in channel) {
-                Log.d("THING", result.toString())
-                stateChannel.send(reducer.reduce(result))
-            }
-        }
 }
+

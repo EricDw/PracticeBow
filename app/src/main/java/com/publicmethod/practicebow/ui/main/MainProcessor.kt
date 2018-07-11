@@ -1,18 +1,30 @@
 package com.publicmethod.practicebow.ui.main
 
 import arrow.core.value
-import com.publicmethod.practicebow.MVCViewModel.Processor
-import com.publicmethod.practicebow.ui.main.MainAction.GetEricAction
+import com.publicmethod.practicebow.MVC.Processor
+import com.publicmethod.practicebow.ui.main.MainAction.GetItemAction
+import com.publicmethod.practicebow.ui.main.MainAction.GetItemsAction
 
 object MainProcessor : Processor<MainAction, MainResult> {
     override fun process(action: MainAction): MainResult {
         return when (action) {
-            is GetEricAction -> {
-                val option = with(action) {
-                    reader.run(ericDependencies)
-                }.value()
-                MainResult.GetEricResult(option)
-            }
+            is GetItemAction -> processGetItemAction(action)
+            is GetItemsAction -> processGetItemsAction(action)
+        }
+    }
+
+    private fun processGetItemAction(action: GetItemAction): MainResult.GetItemResult {
+        return with(action) {
+            MainResult.GetItemResult(
+                    reader.run(action.itemDependencies)
+                            .value()
+                            .unsafeRunSync())
+        }
+    }
+
+    private fun processGetItemsAction(action: GetItemsAction): MainResult.GetItemsResult {
+        return with(action) {
+            MainResult.GetItemsResult(reader.run(itemDependencies).value().unsafeRunSync())
         }
     }
 }

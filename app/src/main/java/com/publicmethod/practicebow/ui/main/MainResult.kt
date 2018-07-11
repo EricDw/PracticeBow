@@ -1,9 +1,10 @@
 package com.publicmethod.practicebow.ui.main
 
 import arrow.core.Option
-import com.publicmethod.practicebow.Eric
-import com.publicmethod.practicebow.MVCViewModel
+import com.publicmethod.data.Item
+import com.publicmethod.practicebow.MVC.Result
 
-sealed class MainResult : MVCViewModel.Result {
-    data class GetEricResult(val ericOption: Option<Eric>) : MainResult()
+sealed class MainResult : Result {
+    data class GetItemResult(val itemOption: Option<Item>) : MainResult()
+    data class GetItemsResult(val itemOption: Option<List<Item>>) : MainResult()
 }

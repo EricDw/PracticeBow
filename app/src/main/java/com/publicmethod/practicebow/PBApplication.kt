@@ -1,9 +1,12 @@
 package com.publicmethod.practicebow
 
 import android.app.Application
+import com.publicmethod.data.ItemDataSource
 
 class PBApplication : Application() {
 
-    fun getDependencies(): ApiService = ApiService()
+    fun getItemRepository(): ItemRepository = ItemRepository(ItemDataSource(
+            itemCache = ItemCache(),
+            itemRemote = ItemRemote()))
 
 }

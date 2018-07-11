@@ -1,9 +1,10 @@
 package com.publicmethod.practicebow.ui.main
 
-import com.publicmethod.practicebow.Eric
-import com.publicmethod.practicebow.MVCViewModel
+import com.publicmethod.data.Item
+import com.publicmethod.practicebow.MVC.State
 
-sealed class MainState : MVCViewModel.State {
-    object LoadingState :   MainState()
-    data class ShowEricState(val eric: Eric) : MainState()
+sealed class MainState : State {
+    data class NoItemsErrorState(val errorMessage: String = "") : MainState()
+    data class ShowItemState(val item: Item) : MainState()
+    data class ShowItemsState(val items: List<Item>) : MainState()
 }

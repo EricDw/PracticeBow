@@ -2,38 +2,23 @@ package com.publicmethod.practicebow.ui.main
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import com.publicmethod.practicebow.MVCViewModel
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.channels.consumeEach
-import kotlinx.coroutines.experimental.launch
+import android.arch.lifecycle.ViewModel
+import com.publicmethod.practicebow.*
+import com.publicmethod.practicebow.MVC.Commandable
+import com.publicmethod.practicebow.MVC.Interpreter
+import com.publicmethod.practicebow.MVC.Processor
+import com.publicmethod.practicebow.MVC.Reducer
+import com.publicmethod.practicebow.MVC.Renderer
 
-class MainViewModel
-    : MVCViewModel<
-        MainCommand,
-        MainAction,
-        MainResult,
-        MainState>() {
-
-    private val mutableStateLiveData = MutableLiveData<MainState>()
+class MainViewModel : ViewModel(), Commandable<MainCommand> by MainMVCM {
 
     val stateLiveData: LiveData<MainState>
         get() = mutableStateLiveData
 
-    override val interpreter: Interpreter<MainCommand, MainAction>
-        get() = MainInterpreter
-
-    override val processor: Processor<MainAction, MainResult>
-        get() = MainProcessor
-
-    override val reducer: Reducer<MainResult, MainState>
-        get() = MainReducer
-
-    init {
-        launch(CommonPool) {
-            stateChannel.openSubscription().consumeEach {
-                mutableStateLiveData.postValue(it)
-            }
+    companion object : Renderer<MainState> {
+        private val mutableStateLiveData = MutableLiveData<MainState>()
+        override fun render(state: MainState) {
+            mutableStateLiveData.postValue(state)
         }
     }
-
 }

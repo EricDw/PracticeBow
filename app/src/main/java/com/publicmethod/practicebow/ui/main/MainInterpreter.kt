@@ -1,26 +1,28 @@
 package com.publicmethod.practicebow.ui.main
 
-import arrow.core.None
-import arrow.core.Some
-import arrow.core.toOption
-import arrow.data.ReaderApi
-import com.publicmethod.practicebow.MVCViewModel.Interpreter
-import com.publicmethod.practicebow.ui.main.MainAction.GetEricAction
-import com.publicmethod.practicebow.ui.main.MainCommand.GetEricCommand
+import com.publicmethod.practicebow.MVC.Interpreter
+import com.publicmethod.practicebow.ui.main.MainAction.GetItemAction
+import com.publicmethod.practicebow.ui.main.MainAction.GetItemsAction
+import com.publicmethod.practicebow.ui.main.MainCommand.GetItemCommand
+import com.publicmethod.practicebow.ui.main.MainCommand.GetItemsCommand
 
 object MainInterpreter : Interpreter<MainCommand, MainAction> {
     override fun interpret(command: MainCommand): MainAction {
         return when (command) {
-            is GetEricCommand -> GetEricAction(
-                    reader = ReaderApi.lift {
-                        with(it.ericApiService.getEric()) {
-                            when {
-                                this != null -> Some(this)
-                                else -> None
-                            }
-                        }
-                    },
-                    ericDependencies = command.dependencies)
+            is GetItemCommand -> processGetItemCommand(command)
+            is GetItemsCommand -> processGetItemsCommand(command)
         }
+    }
+
+    private fun processGetItemCommand(command: GetItemCommand): GetItemAction {
+        return GetItemAction(
+                reader = UseCases.getItemUseCase(command.itemId),
+                itemDependencies = command.dependencies)
+    }
+
+    private fun processGetItemsCommand(command: GetItemsCommand): GetItemsAction {
+        return GetItemsAction(
+                reader = UseCases.getItemsUseCase(),
+                itemDependencies = command.dependencies)
     }
 }

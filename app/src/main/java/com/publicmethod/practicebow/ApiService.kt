@@ -1,5 +1,7 @@
 package com.publicmethod.practicebow
 
+import com.publicmethod.data.Item
+
 class ApiService {
-    fun getEric(): Eric? = Eric()
+    fun getItem(): Item? = Item()
 }

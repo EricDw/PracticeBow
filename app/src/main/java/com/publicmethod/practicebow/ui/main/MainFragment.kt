@@ -3,18 +3,12 @@ package com.publicmethod.practicebow.ui.main
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.publicmethod.practicebow.PBApplication
-import com.publicmethod.practicebow.R
-import com.publicmethod.practicebow.ViewController
-import com.publicmethod.practicebow.getViewModel
+import com.publicmethod.practicebow.*
+import com.publicmethod.practicebow.ui.main.MainState.*
 import kotlinx.android.synthetic.main.main_fragment.*
-import kotlinx.coroutines.experimental.Unconfined
-import kotlinx.coroutines.experimental.channels.consumeEach
-import kotlinx.coroutines.experimental.launch
 
 class MainFragment : Fragment(), ViewController<MainState> {
 
@@ -35,24 +29,35 @@ class MainFragment : Fragment(), ViewController<MainState> {
         instantiateViewModel()
         subscribeToStateChannel()
         getReferenceToApplication()
-        issueGetEricCommand()
+        state_button.setOnClickListener {
+            issueGetItemCommand()
+        }
+        state_button2.setOnClickListener {
+            issueGetItemsCommand()
+        }
     }
 
     private fun subscribeToStateChannel() {
-        Log.d("THING", "SUBSCRIBING TO STATE")
         viewModel.stateLiveData.observe(this, Observer {
-            Log.d("THING", it.toString())
             it?.run {
                 renderState(it)
             }
         })
     }
 
-    private fun issueGetEricCommand() {
+    private fun issueGetItemCommand() {
         viewModel.issueCommand(
-                command = MainCommand.GetEricCommand(
-                        dependencies = GetEricDependencies(
-                                ericApiService = app.getDependencies())))
+                command = MainCommand.GetItemCommand(
+                        dependencies = GetItemDependencies(
+                                itemRepository = app.getItemRepository()),
+                        itemId = "itemID"))
+    }
+
+    private fun issueGetItemsCommand() {
+        viewModel.issueCommand(
+                command = MainCommand.GetItemsCommand(
+                        dependencies = GetItemDependencies(
+                                itemRepository = app.getItemRepository())))
     }
 
     private fun getReferenceToApplication() {
@@ -64,10 +69,14 @@ class MainFragment : Fragment(), ViewController<MainState> {
     }
 
     override fun renderState(state: MainState) {
-        Log.d("THING", state.toString())
         when (state) {
-            is MainState.LoadingState -> state_message.text = "LOADING"
-            is MainState.ShowEricState -> state_message.text = state.eric.name
+            is NoItemsErrorState -> state_message.text = state.errorMessage
+            is ShowItemState -> state_message.text = state.item.name
+            is ShowItemsState -> {
+                var items = ""
+                state.items.forEach { items += it.name }
+                state_message.text = items
+            }
         }
     }
 }
