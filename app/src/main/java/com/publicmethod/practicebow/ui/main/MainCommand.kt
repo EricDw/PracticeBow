@@ -1,16 +1,20 @@
 package com.publicmethod.practicebow.ui.main
 
-import com.publicmethod.practicebow.GetItemDependencies
 import com.publicmethod.practicebow.MVC.Command
+import com.publicmethod.practicebow.Threader
 
-sealed class MainCommand : Command {
+sealed class MainCommand(open val threader: Threader = Threader()) : Command {
 
     data class GetItemCommand(
-            val dependencies: GetItemDependencies,
-            val itemId: String,
-            val currentLoadItemClickAmount: loadItemClickAmount = "0"
-    ) : MainCommand()
+            val getItemScope: GetItemScope,
+            override val threader: Threader = Threader()
+    ) : MainCommand(threader)
 
-    data class GetItemsCommand(val dependencies: GetItemDependencies,
-                               val currentLoadItemClickAmount: loadItemClickAmount = "0") : MainCommand()
+    data class GetItemsCommand(
+            val getItemScope: GetItemsScope,
+            override val threader: Threader = Threader()
+    ) : MainCommand(threader)
+
+    data class InitializeCommand(override val threader: Threader = Threader())
+        : MainCommand(threader)
 }

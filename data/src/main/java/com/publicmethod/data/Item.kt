@@ -1,3 +1,6 @@
 package com.publicmethod.data
 
-data class Item(val name: String = "Item")
+typealias Items = List<Item>
+typealias ItemId = String
+
+data class Item(val name: ItemId = "Item")

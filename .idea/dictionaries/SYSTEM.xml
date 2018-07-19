@@ -2,6 +2,7 @@
   <dictionary name="SYSTEM">
     <words>
       <w>commandable</w>
+      <w>proc</w>
     </words>
   </dictionary>
 </component>

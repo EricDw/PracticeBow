@@ -1,20 +1,20 @@
 package com.publicmethod.data
 
-class ItemDataSource(private val itemCache: Cache<Item>,
-                     private val itemRemote: Remote<Item>) : DataSource<Item> {
+class ItemDataStore(private val itemCache: Cache<Item, ItemId>,
+                    private val itemRemote: Remote<Item, ItemId>) : DataSource<Item, ItemId> {
 
     override fun saveItem(a: Item) {
         itemCache.saveItem(a)
     }
 
-    override fun saveItems(a: List<Item>) = itemCache.saveItems(a)
+    override fun saveItems(a: Items) = itemCache.saveItems(a)
 
-    override fun <String> retrieveItem(id: String): Item? = when (itemCache.isCached(id)) {
+    override fun retrieveItem(id: ItemId): Item? = when (itemCache.isCached(id)) {
         true -> itemCache.retrieveItem(id)
         false -> itemRemote.retrieveItem(id)
     }
 
-    override fun retrieveItems(): List<Item> {
+    override fun retrieveItems(): Items {
         val cachedItems = itemCache.retrieveItems()
         val cachedItemsIsEmpty = cachedItems.isEmpty()
         return when (cachedItemsIsEmpty) {
@@ -31,5 +31,8 @@ class ItemDataSource(private val itemCache: Cache<Item>,
         }
     }
 
-    override fun <String> isCached(id: String): Boolean = itemCache.isCached(id)
+    override fun isCached(id: ItemId): Boolean = itemCache.isCached(id)
+
+    override fun isCached(): Boolean = itemCache.isCached()
+
 }

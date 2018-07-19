@@ -49,14 +49,15 @@ idea {
 
 // Version Numbers
 def arrow_version = "0.7.2"
+def lifecycle_version = "1.1.1"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 //    Support / AndroidX
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 //    Android Architecture Components
-    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
 //    Arrow
     implementation "io.arrow-kt:arrow-core:$arrow_version"
     implementation "io.arrow-kt:arrow-syntax:$arrow_version"
@@ -64,7 +65,7 @@ dependencies {
     implementation "io.arrow-kt:arrow-data:$arrow_version"
     implementation "io.arrow-kt:arrow-instances-core:$arrow_version"
     implementation "io.arrow-kt:arrow-instances-data:$arrow_version"
-    kapt           "io.arrow-kt:arrow-annotations-processor:$arrow_version"
+    kapt "io.arrow-kt:arrow-annotations-processor:$arrow_version"
 
     implementation "io.arrow-kt:arrow-free:$arrow_version"
     implementation "io.arrow-kt:arrow-mtl:$arrow_version"
@@ -76,6 +77,8 @@ dependencies {
 
 //    Testing
     testImplementation 'junit:junit:4.12'
+    implementation 'com.github.EricDw:TestingUtilsExample:v0.0.2-alpha'
+    testImplementation "android.arch.core:core-testing:$lifecycle_version"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation project(path: ':data')

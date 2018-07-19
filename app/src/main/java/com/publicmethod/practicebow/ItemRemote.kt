@@ -1,39 +1,46 @@
 package com.publicmethod.practicebow
 
+import arrow.core.*
+import arrow.core.Either.Right.Companion
 import com.publicmethod.data.Item
-import com.publicmethod.data.Remote
+import com.publicmethod.data.ItemId
+import com.publicmethod.data.Items
+import com.publicmethod.practicebow.ItemRemote.ItemException.NoItemFoundException
 import java.util.*
 
-class ItemRemote : Remote<Item> {
+object ItemRemote {
 
-    private var item: Item? = null
-    private var items: List<Item>? = null
-
-    override fun saveItem(a: Item) {
-        item = a
+    sealed class ItemException : Exception() {
+        object NoItemFoundException : ItemException()
     }
 
-    override fun saveItems(a: List<Item>) {
-        items = a
-    }
+    @Throws(NoItemFoundException::class)
+    private fun sometimesItem(): Item =
+            when (randomIsEven()) {
+                true -> Item()
+                else -> throw NoItemFoundException
 
-    override fun <I> retrieveItem(id: I): Item? = sometimesItem().run { item }
+            }
 
-    override fun retrieveItems(): List<Item> = sometimesItems().run { items ?: emptyList() }
+    @Throws(NoItemFoundException::class)
+    private fun sometimesItems(): Items =
+            when (randomIsEven()) {
+                true -> listOf(Item("1"), Item("2"))
+                else -> throw NoItemFoundException
+            }
 
-    override fun <I> isCached(id: I): Boolean = item?.run { true } ?: false
+    fun retrieveItem(itemId: ItemId): Either<ItemException, Item> =
+            Try { sometimesItem() }.fold(
+                    { Left(NoItemFoundException) },
+                    { Right(it) }
+            )
 
-    private fun sometimesItem() {
-        item = when (Random().nextInt().isEven()) {
-            true -> Item()
-            else -> null
-        }
-    }
 
-    private fun sometimesItems() {
-        items = when (Random().nextInt().isEven()) {
-            true -> listOf(Item("1"), Item("2"))
-            else -> null
-        }
-    }
+    fun retrieveItems(): Either<ItemException, Items> =
+            Try { sometimesItems() }.fold(
+                    { Left(NoItemFoundException) },
+                    { Right(it) }
+            )
+
+    private fun randomIsEven() = Random().nextInt().isEven()
 }

@@ -1,3 +1,5 @@
 package com.publicmethod.data
 
-interface Cache<A> : DataSource<A>
+interface Cache<A, I> : DataSource<A, I> {
+    fun isExpired(): Boolean
+}

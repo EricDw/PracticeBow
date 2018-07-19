@@ -3,15 +3,22 @@ package com.publicmethod.practicebow.ui.main
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.publicmethod.practicebow.*
-import com.publicmethod.practicebow.ui.main.MainCommand.*
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
+import com.publicmethod.practicebow.PBApplication
+import com.publicmethod.practicebow.R
+import com.publicmethod.practicebow.getViewModel
+import com.publicmethod.practicebow.ui.main.MainCommand.GetItemCommand
+import com.publicmethod.practicebow.ui.main.MainCommand.GetItemsCommand
 import com.publicmethod.practicebow.ui.main.MainState.*
 import kotlinx.android.synthetic.main.main_fragment.*
 
-class MainFragment : Fragment(), ViewController<MainState> {
+class MainFragment : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
@@ -20,8 +27,11 @@ class MainFragment : Fragment(), ViewController<MainState> {
     private lateinit var viewModel: MainViewModel
     private lateinit var app: PBApplication
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View {
         return inflater.inflate(R.layout.main_fragment, container, false)
     }
 
@@ -31,6 +41,7 @@ class MainFragment : Fragment(), ViewController<MainState> {
         subscribeToStateChannel()
         getReferenceToApplication()
         viewModel.stateLiveData.value?.apply { renderState(this) }
+                ?: viewModel.issueCommand(MainCommand.InitializeCommand())
         state_button.setOnClickListener {
             issueGetItemCommand()
         }
@@ -42,25 +53,23 @@ class MainFragment : Fragment(), ViewController<MainState> {
     private fun subscribeToStateChannel() {
         viewModel.stateLiveData.observe(this, Observer {
             it?.run {
+                Log.d("MainFragment", "Rendering state")
                 renderState(it)
-            }
+            } ?: Log.d("MainFragment", "State is null")
         })
     }
 
     private fun issueGetItemCommand() {
         viewModel.issueCommand(
                 command = GetItemCommand(
-                        dependencies = GetItemDependencies(
-                                itemRepository = app.getItemRepository()),
-                        itemId = "itemID",
-                        currentLoadItemClickAmount = button_one_clicks.text.toString()))
+                        getItemScope = GetItemScope(
+                                itemId = "itemID",
+                                repository = app.getItemRepository()
+                        )))
     }
 
     private fun issueGetItemsCommand() {
-        viewModel.issueCommand(
-                command = GetItemsCommand(
-                        dependencies = GetItemDependencies(
-                                itemRepository = app.getItemRepository())))
+        viewModel.issueCommand(GetItemsCommand(GetItemsScope()))
     }
 
     private fun getReferenceToApplication() {
@@ -71,32 +80,48 @@ class MainFragment : Fragment(), ViewController<MainState> {
         viewModel = getViewModel()
     }
 
-    override fun renderState(state: MainState) {
-        when (state) {
-            is NoItemsErrorState -> renderNoItemErrorState(state)
-            is ShowItemState -> renderShowItemState(state)
-            is ShowItemsState -> renderShowItemsState(state)
+    private fun renderState(state: MainState) =
+            when (state) {
+                is NoItemsErrorState -> renderNoItemErrorState(state)
+                is ShowItemState -> renderShowItemState(state)
+                is ShowItemsState -> renderShowItemsState(state)
+                is MainState.InitializationState -> renderInitializationState(state)
+            }
+
+    private fun renderInitializationState(state: InitializationState) {
+        with(state.mainModel) {
+            button_one_clicks.text = currentLoadItemClickAmount
+            button_two_clicks.text = currentLoadItemsClickAmount
+
+//            TODO: Handle items and items
         }
     }
+
 
     private fun renderShowItemsState(state: ShowItemsState) =
             with(state) {
                 var itemNames = ""
-                items.forEach { itemNames += it.name }
+                state.mainModel.items.fold({},
+                        { it.forEach { itemNames += "$it.name\n" } }
+                )
                 state_message.text = itemNames
             }
 
     private fun renderShowItemState(state: ShowItemState) {
         with(state) {
-            state_message.text = item.name
-            button_one_clicks.text = loadItemClickAmount
+            mainModel.item.fold({}, {
+                state_message.text = it.name
+            })
+            button_one_clicks.text = mainModel.currentLoadItemsClickAmount
         }
     }
 
     private fun renderNoItemErrorState(state: NoItemsErrorState) =
             with(state) {
-                state_message.text = errorMessage
-                button_one_clicks.text = loadItemClickAmount
+                this.mainModel.errorMessage.fold({}, {
+                    state_message.text = it
+                })
+                button_one_clicks.text = mainModel.currentLoadItemClickAmount
             }
 }
 

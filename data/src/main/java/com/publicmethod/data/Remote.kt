@@ -1,3 +1,3 @@
 package com.publicmethod.data
 
-interface Remote<A> : DataSource<A>
+interface Remote<A, I> : DataSource<A, I>
