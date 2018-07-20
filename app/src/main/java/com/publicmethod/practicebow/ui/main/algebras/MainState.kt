@@ -1,6 +1,7 @@
-package com.publicmethod.practicebow.ui.main
+package com.publicmethod.practicebow.ui.main.algebras
 
-import com.publicmethod.practicebow.MVC.State
+import com.publicmethod.practicebow.Λrcher.State
+import com.publicmethod.practicebow.ui.main.MainModel
 
 sealed class MainState : State {
     data class NoItemsErrorState(val mainModel: MainModel) : MainState()

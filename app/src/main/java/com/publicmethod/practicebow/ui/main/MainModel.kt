@@ -4,7 +4,7 @@ import arrow.core.None
 import arrow.core.Option
 import com.publicmethod.data.Item
 import com.publicmethod.data.Items
-import com.publicmethod.practicebow.MVC.Model
+import com.publicmethod.practicebow.Λrcher.Model
 
 data class MainModel(val item: Option<Item> = None,
                      val items: Option<Items> = None,

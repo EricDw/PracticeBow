@@ -8,10 +8,12 @@ import arrow.data.State
 import arrow.data.runS
 import com.publicmethod.data.Item
 import com.publicmethod.data.Items
-import com.publicmethod.practicebow.ItemRemote
-import com.publicmethod.practicebow.MVC.StateReducer
-import com.publicmethod.practicebow.ui.main.MainResult.*
-import com.publicmethod.practicebow.ui.main.MainState.*
+import com.publicmethod.practicebow.Λrcher.StateReducer
+import com.publicmethod.practicebow.algerbras.ItemException
+import com.publicmethod.practicebow.ui.main.algebras.MainResult
+import com.publicmethod.practicebow.ui.main.algebras.MainResult.*
+import com.publicmethod.practicebow.ui.main.algebras.MainState
+import com.publicmethod.practicebow.ui.main.algebras.MainState.*
 
 object MainStateReducer : StateReducer<MainResult, MainModel, MainState>(MainModel()) {
 
@@ -19,10 +21,10 @@ object MainStateReducer : StateReducer<MainResult, MainModel, MainState>(MainMod
             when (result) {
                 is GetItemResult -> getItemReduction(result)
                 is GetItemsResult -> getItemsReduction(result)
-                is InitializeResult -> getInitializationStateReduction(result)
+                is InitializeResult -> getInitializationStateReduction()
             }
 
-    private fun getInitializationStateReduction(result: InitializeResult)
+    private fun getInitializationStateReduction()
             : State<MainModel, MainState> = State { oldModel ->
         oldModel toT InitializationState(oldModel)
     }
@@ -75,13 +77,13 @@ object MainStateReducer : StateReducer<MainResult, MainModel, MainState>(MainMod
 
     private fun noItemsModel(
             oldModel: MainModel,
-            exception: ItemRemote.ItemException): MainModel =
+            exception: ItemException): MainModel =
             oldModel.copy(
                     errorMessage = Option.fromNullable(exception.message))
 
     private fun noItemModel(
             oldModel: MainModel,
-            exception: ItemRemote.ItemException,
+            exception: ItemException,
             result: GetItemResult): MainModel {
         val currentLoadItemClickAmount = result.loadItemClickState.runS(
                 oldModel.currentLoadItemsClickAmount)

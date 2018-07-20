@@ -4,7 +4,9 @@ import arrow.core.Either
 import arrow.core.toT
 import arrow.data.State
 import com.publicmethod.data.Item
-import com.publicmethod.practicebow.ItemRemote.ItemException
+import com.publicmethod.practicebow.algerbras.ItemException
+import com.publicmethod.practicebow.ui.main.algebras.EitherItems
+import com.publicmethod.practicebow.ui.main.algebras.Scopes
 
 typealias LoadItemClickAmount = String
 typealias LoadItemsClickAmount = String
@@ -12,10 +14,10 @@ typealias ErrorMessage = String
 
 object UseCases {
 
-    fun getItemsUseCase(getItemsScope: GetItemsScope): EitherItems =
+    fun getItemsUseCase(getItemsScope: Scopes.GetItemsScope): EitherItems =
             getItemsScope.repository.getItems()
 
-    fun getItemUseCase(getItemScope: GetItemScope): Either<ItemException, Item> =
+    fun getItemUseCase(getItemScope: Scopes.GetItemScope): Either<ItemException, Item> =
             getItemScope.repository.getItem(getItemScope.itemId)
 
     fun updateClickStateUseCase(): State<LoadItemClickAmount, Int> =

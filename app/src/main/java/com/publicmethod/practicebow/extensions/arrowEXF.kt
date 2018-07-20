@@ -1,4 +1,4 @@
-package com.publicmethod.practicebow
+package com.publicmethod.practicebow.extensions
 
 import arrow.core.Id
 

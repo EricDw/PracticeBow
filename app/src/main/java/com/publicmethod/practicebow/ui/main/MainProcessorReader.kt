@@ -2,11 +2,13 @@
 
 package com.publicmethod.practicebow.ui.main
 
-import com.publicmethod.practicebow.MVC.ActionProcessor
-import com.publicmethod.practicebow.ui.main.MainAction.*
-import com.publicmethod.practicebow.ui.main.MainResult.*
+import com.publicmethod.practicebow.Λrcher.ActionProcessor
+import com.publicmethod.practicebow.ui.main.algebras.MainAction.*
+import com.publicmethod.practicebow.ui.main.algebras.MainResult.*
 import com.publicmethod.practicebow.ui.main.UseCases.getItemUseCase
 import com.publicmethod.practicebow.ui.main.UseCases.updateClickStateUseCase
+import com.publicmethod.practicebow.ui.main.algebras.MainAction
+import com.publicmethod.practicebow.ui.main.algebras.MainResult
 
 object MainProcessorReader : ActionProcessor<MainAction, MainResult>() {
     override fun processAction(action: MainAction): MainResult =

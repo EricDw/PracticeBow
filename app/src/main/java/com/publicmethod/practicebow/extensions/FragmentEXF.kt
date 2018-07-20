@@ -1,4 +1,4 @@
-package com.publicmethod.practicebow
+package com.publicmethod.practicebow.extensions
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders

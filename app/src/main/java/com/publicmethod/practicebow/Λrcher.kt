@@ -1,12 +1,13 @@
-@file:Suppress("FunctionName")
+@file:Suppress("FunctionName", "MemberVisibilityCanBePrivate")
 
 package com.publicmethod.practicebow
 
 import arrow.data.Reader
 import arrow.data.run
 import arrow.data.runId
+import com.publicmethod.practicebow.extensions.toId
 
-object MVC {
+object Λrcher {
 
 //region Interfaces
 
@@ -15,10 +16,6 @@ object MVC {
     interface State
     interface Result
     interface Model
-
-    interface Reducer<R, S> {
-        fun reduce(result: R): S
-    }
 
     interface Commandable<C : Command> {
         fun issueCommand(command: C)
@@ -31,7 +28,7 @@ object MVC {
         fun interpreterReader(): Reader<C, A> =
                 Reader { command -> interpretCommand(command).toId() }
 
-        fun interpret(command: C) = interpreterReader().runId(command)
+        fun interpret(command: C): A = interpreterReader().runId(command)
 
         protected abstract fun interpretCommand(command: C): A
 
@@ -42,7 +39,7 @@ object MVC {
         fun processorReader(): Reader<A, R> =
                 Reader { action -> processAction(action).toId() }
 
-        fun process(action: A) = processorReader().runId(action)
+        fun process(action: A): R = processorReader().runId(action)
 
         protected abstract fun processAction(action: A): R
 
@@ -50,14 +47,12 @@ object MVC {
 
     abstract class StateReducer<R : Result,
             M : Model,
-            S : State
-            >(private var _oldModel: M)
-        : Reducer<R, S> {
+            S : State>(private var _oldModel: M) {
 
         val oldModel: M
             get() = _oldModel
 
-        override fun reduce(result: R): S {
+        fun reduce(result: R): S {
             val reduction = reduceState(result).run(_oldModel)
             _oldModel = reduction.a
             return reduction.b

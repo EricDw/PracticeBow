@@ -1,13 +1,17 @@
 package com.publicmethod.practicebow.ui.main
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import arrow.core.Option
-import arrow.core.Some
 import com.publicmethod.kotlintestingutils.assertTrueWithMessage
 import com.publicmethod.practicebow.LeftItemRepo
-import com.publicmethod.practicebow.MockThreader
 import com.publicmethod.practicebow.RightItemRepo
-import com.publicmethod.practicebow.ui.main.MainCommand.GetItemsCommand
+import com.publicmethod.practicebow.threading.MockContextProvider
+import com.publicmethod.practicebow.threading.MockThreader
+import com.publicmethod.practicebow.ui.main.algebras.MainCommand
+import com.publicmethod.practicebow.ui.main.algebras.MainCommand.GetItemsCommand
+import com.publicmethod.practicebow.ui.main.algebras.MainState
+import com.publicmethod.practicebow.ui.main.algebras.Scopes
+import kotlinx.coroutines.experimental.Unconfined
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Rule
 import org.junit.Test
 
@@ -18,9 +22,9 @@ class MainViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     @Test
-    fun given_initializationCommand_return_initializationState() {
+    fun given_initializationCommand_return_initializationState()  {
         // Arrange
-        val viewModel = MainViewModel()
+        val viewModel = MainViewModel(contextProvider = MockContextProvider())
         val input = MainCommand.InitializeCommand(MockThreader())
         val expectedOutput = true
 
@@ -36,10 +40,10 @@ class MainViewModelTest {
     }
 
     @Test
-    fun given_GetItemCommand_of_right_return_GetItemState() {
+    fun given_GetItemCommand_of_right_return_GetItemState()  {
         // Arrange
-        val viewModel = MainViewModel()
-        val input = MainCommand.GetItemCommand(GetItemScope(
+        val viewModel = MainViewModel(contextProvider = MockContextProvider())
+        val input = MainCommand.GetItemCommand(Scopes.GetItemScope(
                 "ID",
                 RightItemRepo), MockThreader())
 
@@ -57,10 +61,10 @@ class MainViewModelTest {
     }
 
     @Test
-    fun given_GetItemCommand_of_left_return_NoItemErrorState() {
+    fun given_GetItemCommand_of_left_return_NoItemErrorState()  {
         // Arrange
-        val viewModel = MainViewModel()
-        val input = MainCommand.GetItemCommand(GetItemScope(
+        val viewModel = MainViewModel(contextProvider = MockContextProvider())
+        val input = MainCommand.GetItemCommand(Scopes.GetItemScope(
                 "ID",
                 LeftItemRepo), MockThreader())
 
@@ -78,11 +82,11 @@ class MainViewModelTest {
     }
 
     @Test
-    fun given_GetItemsCommand_of_right_return_GetItemsState() {
+    fun given_GetItemsCommand_of_right_return_GetItemsState()  {
         // Arrange
-        val viewModel = MainViewModel()
+        val viewModel = MainViewModel(contextProvider = MockContextProvider())
         val input = GetItemsCommand(
-                GetItemsScope(RightItemRepo),
+                Scopes.GetItemsScope(RightItemRepo),
                 MockThreader())
 
         val expectedOutput = true
@@ -99,11 +103,11 @@ class MainViewModelTest {
     }
 
     @Test
-    fun given_GetItemsCommand_of_left_return_NoItemErrorState() {
+    fun given_GetItemsCommand_of_left_return_NoItemErrorState()  {
         // Arrange
-        val viewModel = MainViewModel()
+        val viewModel = MainViewModel(contextProvider = MockContextProvider())
         val input = GetItemsCommand(
-                GetItemsScope(LeftItemRepo),
+                Scopes.GetItemsScope(LeftItemRepo),
                 MockThreader())
 
         val expectedOutput = true

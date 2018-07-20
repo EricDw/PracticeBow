@@ -7,15 +7,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import arrow.core.None
-import arrow.core.Option
-import arrow.core.Some
 import com.publicmethod.practicebow.PBApplication
 import com.publicmethod.practicebow.R
-import com.publicmethod.practicebow.getViewModel
-import com.publicmethod.practicebow.ui.main.MainCommand.GetItemCommand
-import com.publicmethod.practicebow.ui.main.MainCommand.GetItemsCommand
-import com.publicmethod.practicebow.ui.main.MainState.*
+import com.publicmethod.practicebow.extensions.getViewModel
+import com.publicmethod.practicebow.ui.main.algebras.MainCommand
+import com.publicmethod.practicebow.ui.main.algebras.MainCommand.GetItemCommand
+import com.publicmethod.practicebow.ui.main.algebras.MainCommand.GetItemsCommand
+import com.publicmethod.practicebow.ui.main.algebras.MainState
+import com.publicmethod.practicebow.ui.main.algebras.MainState.*
+import com.publicmethod.practicebow.ui.main.algebras.Scopes
 import kotlinx.android.synthetic.main.main_fragment.*
 
 class MainFragment : Fragment() {
@@ -62,14 +62,14 @@ class MainFragment : Fragment() {
     private fun issueGetItemCommand() {
         viewModel.issueCommand(
                 command = GetItemCommand(
-                        getItemScope = GetItemScope(
+                        getItemScope = Scopes.GetItemScope(
                                 itemId = "itemID",
                                 repository = app.getItemRepository()
                         )))
     }
 
     private fun issueGetItemsCommand() {
-        viewModel.issueCommand(GetItemsCommand(GetItemsScope()))
+        viewModel.issueCommand(GetItemsCommand(Scopes.GetItemsScope()))
     }
 
     private fun getReferenceToApplication() {

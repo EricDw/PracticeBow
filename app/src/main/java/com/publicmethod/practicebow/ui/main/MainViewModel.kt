@@ -3,15 +3,22 @@ package com.publicmethod.practicebow.ui.main
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import arrow.effects.IO
-import arrow.effects.async
-import arrow.effects.fix
-import com.publicmethod.practicebow.MVC.ActionProcessor
-import com.publicmethod.practicebow.MVC.CommandInterpreter
-import com.publicmethod.practicebow.MVC.ModelViewCommand
-import com.publicmethod.practicebow.MVC.StateReducer
+import com.publicmethod.practicebow.threading.ContextProvider
+import com.publicmethod.practicebow.ui.main.algebras.MainAction
+import com.publicmethod.practicebow.ui.main.algebras.MainCommand
+import com.publicmethod.practicebow.ui.main.algebras.MainResult
+import com.publicmethod.practicebow.ui.main.algebras.MainState
+import com.publicmethod.practicebow.Λrcher.ActionProcessor
+import com.publicmethod.practicebow.Λrcher.CommandInterpreter
+import com.publicmethod.practicebow.Λrcher.ModelViewCommand
+import com.publicmethod.practicebow.Λrcher.StateReducer
+import kotlinx.coroutines.experimental.CancellationException
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.channels.actor
+import kotlinx.coroutines.experimental.launch
 
-class MainViewModel
+class MainViewModel(private val contextProvider: ContextProvider = ContextProvider())
     : ViewModel(), ModelViewCommand<
         MainCommand,
         MainAction,
@@ -28,16 +35,84 @@ class MainViewModel
     override val processor: ActionProcessor<MainAction, MainResult> = MainProcessorReader
     override val reducer: StateReducer<MainResult, MainModel, MainState> = MainStateReducer
 
+    private val parentJob = Job()
+
+    private val interpreterRelay = actor<MainCommand>(
+            context = contextProvider.BackgroundContext,
+            capacity = Channel.UNLIMITED,
+            parent = parentJob
+    ) {
+        for (command in channel) {
+            interpreterActor.send(command)
+        }
+    }
+
+    private val processorRelay = actor<MainAction>(
+            context = contextProvider.BackgroundContext,
+            capacity = Channel.UNLIMITED,
+            parent = parentJob
+    ) {
+        for (action in channel) {
+            processorActor.send(action)
+        }
+    }
+
+    private val reducerRelay = actor<MainResult>(
+            context = contextProvider.BackgroundContext,
+            capacity = Channel.UNLIMITED,
+            parent = parentJob
+    ) {
+        for (result in channel) {
+            reducerActor.send(result)
+        }
+    }
+
+    private val stateRelay = actor<MainState>(
+            context = contextProvider.BackgroundContext,
+            capacity = Channel.UNLIMITED,
+            parent = parentJob
+    ) {
+        for (state in channel) {
+            mutableStateLiveData.postValue(state)
+        }
+    }
+
+    private val interpreterActor = actor<MainCommand>(
+            context = contextProvider.BackgroundContext,
+            capacity = Channel.UNLIMITED,
+            parent = parentJob
+    ) {
+        for (command in channel) {
+            processorRelay.send(interpreter.interpret(command))
+        }
+    }
+
+    private val processorActor = actor<MainAction>(
+            context = contextProvider.BackgroundContext,
+            capacity = Channel.UNLIMITED,
+            parent = parentJob
+    ) {
+        for (action in channel) {
+            reducerRelay.send(processor.process(action))
+        }
+    }
+
+    private val reducerActor = actor<MainResult>(
+            context = contextProvider.BackgroundContext,
+            capacity = Channel.UNLIMITED,
+            parent = parentJob
+    ) {
+        for (result in channel) {
+            stateRelay.send(reducer.reduce(result))
+        }
+    }
+
     override fun issueCommand(command: MainCommand) {
-        command.threader.threadAsync(
-                f = {
-                        val action = interpreter.interpret(command)
-                        val result = processor.process(action)
-                        val state = reducer.reduce(result)
-                        state
-                },
-                onError = {},
-                onSuccess = { newState -> mutableStateLiveData.postValue(newState) },
-                AC = IO.async()).fix().unsafeRunAsync {}
+        launch(contextProvider.BackgroundContext) { interpreterRelay.send(command) }
+    }
+
+    override fun onCleared() {
+        parentJob.cancel(CancellationException("ViewModel being destroyed"))
+        super.onCleared()
     }
 }
