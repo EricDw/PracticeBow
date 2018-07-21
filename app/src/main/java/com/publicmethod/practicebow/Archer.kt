@@ -7,7 +7,7 @@ import arrow.data.run
 import arrow.data.runId
 import com.publicmethod.practicebow.extensions.toId
 
-object Λrcher {
+object Archer {
 
 //region Interfaces
 
@@ -21,7 +21,20 @@ object Λrcher {
         fun issueCommand(command: C)
     }
 
+    interface StateHandler<S : State> {
+        fun handleState(state: S)
+    }
+
+    interface ModelViewCommand<C : Command, A : Action, R : Result, S : State, M : Model>
+        : Commandable<C> {
+        val interpreter: CommandInterpreter<C, A>
+        val processor: ActionProcessor<A, R>
+        val reducer: StateReducer<R, M, S>
+    }
+
 //endregion Interfaces
+
+//region Abstract Classes
 
     abstract class CommandInterpreter<C : Command, A : Action> {
 
@@ -57,14 +70,10 @@ object Λrcher {
             _oldModel = reduction.a
             return reduction.b
         }
-
         protected abstract fun reduceState(result: R): arrow.data.State<M, S>
+
     }
 
-    interface ModelViewCommand<C : Command, A : Action, R : Result, S : State, M : Model>
-        : Commandable<C> {
-        val interpreter: CommandInterpreter<C, A>
-        val processor: ActionProcessor<A, R>
-        val reducer: StateReducer<R, M, S>
-    }
+//endregion Abstract Classes
+
 }

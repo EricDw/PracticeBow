@@ -1,7 +1,7 @@
 package com.publicmethod.practicebow.ui.main.algebras
 
 import arrow.data.State
-import com.publicmethod.practicebow.Λrcher.Result
+import com.publicmethod.practicebow.Archer.Result
 import com.publicmethod.practicebow.ui.main.LoadItemClickAmount
 import com.publicmethod.practicebow.ui.main.MainModel
 

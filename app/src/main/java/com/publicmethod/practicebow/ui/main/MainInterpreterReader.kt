@@ -1,6 +1,6 @@
 package com.publicmethod.practicebow.ui.main
 
-import com.publicmethod.practicebow.Λrcher.CommandInterpreter
+import com.publicmethod.practicebow.Archer.CommandInterpreter
 import com.publicmethod.practicebow.ui.main.algebras.MainAction
 import com.publicmethod.practicebow.ui.main.algebras.MainAction.*
 import com.publicmethod.practicebow.ui.main.algebras.MainCommand

@@ -1,6 +1,6 @@
 package com.publicmethod.practicebow.ui.main.algebras
 
-import com.publicmethod.practicebow.Λrcher.Action
+import com.publicmethod.practicebow.Archer.Action
 
 sealed class MainAction : Action {
     data class GetItemAction(val getItemScope: Scopes.GetItemScope) : MainAction()

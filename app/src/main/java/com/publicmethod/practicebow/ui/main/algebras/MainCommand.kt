@@ -1,6 +1,6 @@
 package com.publicmethod.practicebow.ui.main.algebras
 
-import com.publicmethod.practicebow.Λrcher.Command
+import com.publicmethod.practicebow.Archer.Command
 import com.publicmethod.practicebow.threading.Threader
 
 sealed class MainCommand(open val threader: Threader = Threader()) : Command {

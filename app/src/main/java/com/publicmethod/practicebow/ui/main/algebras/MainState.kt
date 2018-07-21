@@ -1,6 +1,6 @@
 package com.publicmethod.practicebow.ui.main.algebras
 
-import com.publicmethod.practicebow.Λrcher.State
+import com.publicmethod.practicebow.Archer.State
 import com.publicmethod.practicebow.ui.main.MainModel
 
 sealed class MainState : State {
